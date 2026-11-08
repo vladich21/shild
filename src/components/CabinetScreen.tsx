@@ -1,0 +1,44 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { BackLink } from "@/components/BackLink";
+import { DeviceCard } from "@/components/DeviceCard";
+import { loadDevices, loadEmail } from "@/lib/storage";
+
+export function CabinetScreen() {
+  const router = useRouter();
+  const [devices] = useState(() => loadDevices());
+  const [email] = useState(() => loadEmail());
+
+  useEffect(() => {
+    if (!email) router.replace("/login");
+  }, [email, router]);
+
+  if (!email) return <p className="mx-auto max-w-7xl px-6 py-10 text-muted">Открываем вход…</p>;
+
+  return (
+    <div className="mx-auto max-w-7xl px-6 py-10">
+      <BackLink href="/" />
+      <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
+        <h1 className="font-display text-4xl">Моя техника</h1>
+        <Link href="/add" className="btn btn-primary">
+          Добавить устройство
+        </Link>
+      </div>
+
+      {devices.length === 0 ? (
+        <div className="panel mt-8 p-6">
+          <p>В кабинете пока пусто. Добавьте первое устройство.</p>
+        </div>
+      ) : (
+        <div className="mt-8 grid gap-3 md:grid-cols-2">
+          {devices.map((device) => (
+            <DeviceCard key={device.id} device={device} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

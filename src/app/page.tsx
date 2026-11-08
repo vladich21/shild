@@ -1,69 +1,136 @@
-import Image from "next/image";
+import Link from "next/link";
+import { Questions, Reveal } from "@/components/HomeMotion";
+import { Nameplate } from "@/components/Nameplate";
 
-export default function Home() {
+const steps = [
+  { n: "1", title: "Фото", text: "Чек, коробка или наклейка на корпусе." },
+  { n: "2", title: "Проверка", text: "Модель предлагает поля. Человек их подтверждает." },
+  { n: "3", title: "Паспорт", text: "В карточке лежат модель, серийный номер, чек и инструкция." },
+  { n: "4", title: "Напоминание", text: "Шильд показывает, когда кончается гарантия и что пора обслужить." },
+];
+
+const tariffs = [
+  {
+    name: "Бесплатный",
+    price: "0 ₽",
+    alt: "навсегда",
+    pitch: "Уже можно открыть.",
+    status: "Открыт",
+    mark: "",
+    points: ["До 5 устройств", "Фото чека и наклейки", "Модель, серия и цена", "Срок гарантии в карточке", "Напоминание в кабинете"],
+    featured: false,
+  },
+  {
+    name: "Premium",
+    price: "299 ₽/мес",
+    alt: "или 2 990 ₽/год",
+    pitch: "Больше пяти устройств.",
+    status: "",
+    mark: "Основной",
+    points: ["Без лимита устройств", "Чтение снимка", "Характеристики из каталога", "Поиск инструкции", "Письмо о конце гарантии"],
+    featured: true,
+  },
+  {
+    name: "Family",
+    price: "599 ₽/мес",
+    alt: "или 5 990 ₽/год",
+    pitch: "Несколько человек дома.",
+    status: "",
+    mark: "Для семьи",
+    points: ["До 5 человек", "Общие карточки дома", "Своя техника и общая", "Напоминание каждому", "Один кабинет на семью"],
+    featured: false,
+  },
+  {
+    name: "Business",
+    price: "1 399 ₽/мес",
+    alt: "или 13 990 ₽/год",
+    pitch: "Техника всего офиса.",
+    status: "",
+    mark: "Для офиса",
+    points: ["Несколько сотрудников", "Техника офиса", "Кто купил и где лежит", "Общие сроки гарантии", "Экспорт списка"],
+    featured: false,
+  },
+];
+
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div>
+      <section className="hero-wash flex items-center text-paper">
+        <div className="hero-wash-light" aria-hidden="true" />
+        <div className="hero-wash-light-late" aria-hidden="true" />
+        <div className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-12 px-6 py-16 md:grid-cols-[1.2fr_0.8fr] md:gap-16">
+          <div>
+            <p className="text-sm tracking-[0.18em] text-orange">ЛИЧНЫЙ ПАСПОРТ ТЕХНИКИ</p>
+            <h1 className="mt-4 font-display text-4xl leading-tight sm:text-5xl">
+              Сфотографировал технику — получил её паспорт
+            </h1>
+            <p className="mt-5 max-w-xl text-lg text-paper/80">
+              Чеки, серийные номера и сроки гарантии больше не остаются на бумажках.
+              Шильд собирает их в одну карточку и заранее напоминает, когда срок подходит к концу.
+            </p>
+            <div className="mt-8">
+              <Link href="/cabinet" className="btn btn-primary">
+                Открыть кабинет
+              </Link>
+            </div>
+          </div>
+          <Nameplate />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-16">
+        <h2 className="font-display text-4xl">Как это работает</h2>
+        <div className="mt-8">
+          {steps.map((step) => (
+            <Reveal key={step.n}>
+              <article className="grid gap-3 border-t border-line py-8 md:grid-cols-[7rem_1fr]">
+                <p className="font-display text-5xl text-orange">{step.n}</p>
+                <div className="max-w-xl">
+                  <h3 className="font-display text-3xl">{step.title}</h3>
+                  <p className="mt-3 text-lg leading-8 text-muted">{step.text}</p>
+                </div>
+              </article>
+            </Reveal>
+          ))}
         </div>
-      </main>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-16">
+        <h2 className="font-display text-4xl">Тарифы</h2>
+        <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {tariffs.map((tariff, index) => (
+            <Reveal key={tariff.name} delay={index * 160} className="h-full">
+              <article className={`flex h-full flex-col p-5 ${tariff.featured ? "bg-ink text-paper" : "panel"}`}>
+                <div className="flex items-center justify-between gap-3">
+                  {tariff.status ? (
+                    <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-orange">
+                      <span className="h-1.5 w-1.5 bg-orange" />
+                      {tariff.status}
+                    </span>
+                  ) : null}
+                  {tariff.mark ? (
+                    <span className={`text-xs uppercase tracking-[0.14em] ${tariff.featured ? "text-orange" : "text-muted"}`}>{tariff.mark}</span>
+                  ) : null}
+                </div>
+                <h3 className="mt-6 font-display text-2xl">{tariff.name}</h3>
+                <p className="mt-4 text-2xl">{tariff.price}</p>
+                <p className={`text-sm ${tariff.featured ? "text-paper/60" : "text-muted"}`}>{tariff.alt}</p>
+                <p className={`mt-3 text-sm leading-6 ${tariff.featured ? "text-paper/80" : "text-muted"}`}>{tariff.pitch}</p>
+                <ul className={`mt-5 space-y-2.5 border-t pt-4 text-sm ${tariff.featured ? "border-white/15" : "border-line"}`}>
+                  {tariff.points.map((point) => (
+                    <li key={point} className="flex gap-2">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 bg-orange" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      <Questions />
     </div>
   );
 }
