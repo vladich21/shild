@@ -1,4 +1,4 @@
-import { SEED } from "@/lib/seed";
+import { withDemoDevices } from "@/lib/seed";
 import type { Device } from "@/lib/types";
 
 const DEMO_EMAIL = "vladkoval039@gmail.com";
@@ -14,6 +14,7 @@ type StoredAccount = {
   salt: string;
   hash: string;
   devices: Device[];
+  demoReady?: boolean;
 };
 
 type Accounts = Record<string, StoredAccount>;
@@ -51,7 +52,15 @@ export function suggestedEmail() {
 }
 
 export function loadAccountDevices(email: string): Device[] {
-  return readAccounts()[email]?.devices ?? [];
+  const accounts = readAccounts();
+  const account = accounts[email];
+  if (!account) return [];
+  if (!account.demoReady) {
+    account.devices = withDemoDevices(account.devices);
+    account.demoReady = true;
+    writeAccounts(accounts);
+  }
+  return account.devices;
 }
 
 export function writeAccountDevices(email: string, devices: Device[]) {
@@ -80,7 +89,7 @@ export async function registerAccount(email: string, password: string): Promise<
   } catch {
     return { field: "password", message: "Откройте Шильд через localhost, чтобы сохранить пароль." };
   }
-  accounts[normalized] = { ...hash, devices: startingDevices(normalized) };
+  accounts[normalized] = { ...hash, devices: startingDevices(normalized), demoReady: true };
   writeAccounts(accounts);
   startSession(normalized);
   return null;
@@ -116,8 +125,8 @@ function startSession(email: string) {
 }
 
 function startingDevices(email: string): Device[] {
-  if (email !== DEMO_EMAIL) return [];
-  return claimLegacyDevices() ?? structuredClone(SEED);
+  const legacy = email === DEMO_EMAIL ? claimLegacyDevices() : null;
+  return withDemoDevices(legacy ?? []);
 }
 
 function claimLegacyDevices(): Device[] | null {

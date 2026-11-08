@@ -11,6 +11,7 @@ import { categoryFromReading, FREE_DEVICE_LIMIT, matchCatalog } from "@/lib/cata
 import { formatPriceInput, todayIso } from "@/lib/dates";
 import { compressImage } from "@/lib/image";
 import { modelsMatch } from "@/lib/recognition";
+import { isDemoDevice } from "@/lib/seed";
 import { loadDevices, loadEmail, saveDevices } from "@/lib/storage";
 import type { CatalogModel, Device, Recognition, WarrantySource } from "@/lib/types";
 
@@ -53,7 +54,7 @@ const emptyDraft: Draft = {
 export function AddScreen() {
   const router = useRouter();
   const [draft, setDraft] = useState<Draft>(emptyDraft);
-  const [count, setCount] = useState(() => loadDevices().length);
+  const [count, setCount] = useState(() => loadDevices().filter((item) => !isDemoDevice(item)).length);
   const [reading, setReading] = useState<"photoDataUrl" | "receiptDataUrl" | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [notice, setNotice] = useState("");

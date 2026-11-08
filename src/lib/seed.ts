@@ -11,6 +11,17 @@ const washer = fromCatalog("bosch-wau28t40");
 const buds = fromCatalog("samsung-buds-fe");
 const laptop = fromCatalog("macbook-air-13");
 
+export function isDemoDevice(device: { id: string }) {
+  return device.id.startsWith("seed-");
+}
+
+export function withDemoDevices(devices: Device[]): Device[] {
+  const ids = new Set(devices.map((item) => item.id));
+  const missing = SEED.filter((item) => !ids.has(item.id));
+  if (missing.length === 0) return devices;
+  return [...structuredClone(missing), ...devices];
+}
+
 export const SEED: Device[] = [
   {
     id: "seed-washer",

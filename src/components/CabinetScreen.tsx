@@ -27,6 +27,9 @@ export function CabinetScreen() {
           Добавить устройство
         </Link>
       </div>
+      <p className="mt-3 max-w-2xl text-sm text-muted">
+        Стиральная машина, наушники и ноутбук уже лежат в кабинете на любом компьютере. Своё устройство можно добавить рядом: оно сохранится в этом браузере.
+      </p>
 
       {devices.length === 0 ? (
         <div className="panel mt-8 p-6">
