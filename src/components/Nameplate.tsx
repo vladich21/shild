@@ -1,6 +1,6 @@
 export function Nameplate() {
   return (
-    <div className="nameplate" aria-hidden="true">
+    <div className="nameplate w-full min-w-0" aria-hidden="true">
       {/* Product photo is a local asset with a transparent background. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/c530.png" alt="" className="mx-auto h-56 w-auto object-contain" />

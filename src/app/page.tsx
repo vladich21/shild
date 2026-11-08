@@ -58,10 +58,10 @@ export default function HomePage() {
       <section className="hero-wash flex items-center text-paper">
         <div className="hero-wash-light" aria-hidden="true" />
         <div className="hero-wash-light-late" aria-hidden="true" />
-        <div className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-12 px-6 py-16 md:grid-cols-[1.2fr_0.8fr] md:gap-16">
-          <div>
-            <p className="text-sm tracking-[0.18em] text-orange">ЛИЧНЫЙ ПАСПОРТ ТЕХНИКИ</p>
-            <h1 className="mt-4 font-display text-4xl leading-tight sm:text-5xl">
+        <div className="relative z-10 mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-center gap-10 px-5 py-12 sm:px-6 sm:py-16 md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] md:gap-16">
+          <div className="min-w-0">
+            <p className="text-sm tracking-[0.14em] text-orange sm:tracking-[0.18em]">ЛИЧНЫЙ ПАСПОРТ ТЕХНИКИ</p>
+            <h1 className="mt-4 font-display text-[1.65rem] leading-tight sm:text-5xl">
               Сфотографировал технику — получил её паспорт
             </h1>
             <p className="mt-5 max-w-xl text-lg text-paper/80">
@@ -78,8 +78,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-16">
-        <h2 className="font-display text-4xl">Как это работает</h2>
+      <section className="mx-auto max-w-7xl px-5 py-12 sm:px-6 sm:py-16">
+        <h2 className="font-display text-3xl sm:text-4xl">Как это работает</h2>
         <div className="mt-8">
           {steps.map((step) => (
             <Reveal key={step.n}>
@@ -95,8 +95,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-16">
-        <h2 className="font-display text-4xl">Тарифы</h2>
+      <section className="mx-auto max-w-7xl px-5 py-12 sm:px-6 sm:py-16">
+        <h2 className="font-display text-3xl sm:text-4xl">Тарифы</h2>
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {tariffs.map((tariff, index) => (
             <Reveal key={tariff.name} delay={index * 160} className="h-full">
