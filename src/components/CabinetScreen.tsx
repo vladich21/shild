@@ -22,7 +22,7 @@ export function CabinetScreen() {
     <div className="mx-auto max-w-7xl px-6 py-10">
       <BackLink href="/" />
       <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
-        <h1 className="font-display text-4xl">Моя техника</h1>
+        <h1 className="min-w-0 font-display text-3xl leading-tight sm:text-4xl">Моя техника</h1>
         <Link href="/add" className="btn btn-primary">
           Добавить устройство
         </Link>

@@ -314,8 +314,8 @@ export function AddScreen() {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-6 pb-4 pt-10">
       <BackLink href="/cabinet" />
-      <div className="flex items-end justify-between gap-6">
-        <h1 className="font-display text-3xl">Добавить технику</h1>
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+        <h1 className="min-w-0 font-display text-[1.7rem] leading-tight sm:text-3xl">Добавить технику</h1>
         {status ? <p className="max-w-xl text-right text-base text-muted">{status}</p> : null}
       </div>
 

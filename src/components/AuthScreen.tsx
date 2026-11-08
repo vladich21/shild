@@ -53,7 +53,7 @@ export function AuthScreen({ mode }: { mode: "login" | "register" }) {
     <div className="mx-auto w-full max-w-md px-6 py-12">
       <BackLink href="/" />
       <p className="mt-6 text-xs uppercase tracking-[0.18em] text-muted">{register ? "Регистрация" : "Вход"}</p>
-      <h1 className="mt-3 font-display text-4xl">{register ? "Новый кабинет" : "Вход по почте"}</h1>
+      <h1 className="mt-3 font-display text-3xl leading-tight sm:text-4xl">{register ? "Новый кабинет" : "Вход по почте"}</h1>
       <p className="mt-3 text-sm leading-6 text-muted">
         {register
           ? "Почта станет адресом кабинета: на неё собираются письма о гарантии. Пароль нужен, чтобы войти снова."

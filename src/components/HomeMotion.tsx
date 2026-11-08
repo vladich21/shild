@@ -69,7 +69,7 @@ export function Questions() {
   return (
     <section className="mx-auto max-w-7xl px-6 py-16">
       <Reveal>
-        <h2 className="max-w-xl font-display text-4xl leading-tight">Коротко о кабинете</h2>
+        <h2 className="max-w-xl font-display text-3xl leading-tight sm:text-4xl">Коротко о кабинете</h2>
       </Reveal>
       <div className="mt-8">
         {questions.map((item, index) => {
@@ -83,7 +83,7 @@ export function Questions() {
                 aria-expanded={on}
                 onClick={() => setOpen(on ? -1 : index)}
               >
-                <span className="font-display text-2xl leading-tight">{item.q}</span>
+                <span className="min-w-0 font-display text-xl leading-tight sm:text-2xl">{item.q}</span>
                 <span className="text-2xl leading-none text-orange">{on ? "–" : "+"}</span>
               </button>
               <div className={`grid transition-[grid-template-rows] duration-500 ease-out ${on ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>

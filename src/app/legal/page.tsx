@@ -54,7 +54,7 @@ export default function LegalPage() {
       <div className="mt-10 grid max-w-3xl gap-8">
         {sections.map((section) => (
           <section key={section.title}>
-            <h2 className="font-display text-2xl">{section.title}</h2>
+            <h2 className="font-display text-xl leading-tight sm:text-2xl">{section.title}</h2>
             <p className="mt-3 text-base leading-7">{section.text}</p>
           </section>
         ))}

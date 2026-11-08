@@ -159,7 +159,7 @@ export function DeviceScreen({ id }: { id: string }) {
 
         <div className="rise rise-late min-w-0 pt-1">
           <p className="text-xs uppercase tracking-[0.18em] text-muted">{device.category}</p>
-          <h1 className="mt-3 text-[2.5rem] font-medium leading-[1.05] tracking-tight">{device.title}</h1>
+          <h1 className="mt-3 text-[1.75rem] font-medium leading-tight tracking-tight sm:text-[2.5rem] sm:leading-[1.05]">{device.title}</h1>
           {showSubtitle ? <p className="mt-3 text-lg text-muted">{subtitle}</p> : null}
 
           <dl className="mt-8 border-t border-line">
