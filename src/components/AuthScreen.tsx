@@ -94,6 +94,15 @@ export function AuthScreen({ mode }: { mode: "login" | "register" }) {
             }}
           />
         ) : null}
+        {register ? (
+          <p className="text-sm leading-6 text-muted">
+            Создавая кабинет, вы соглашаетесь с{" "}
+            <Link href="/legal" className="link-orange">
+              правовой информацией
+            </Link>
+            .
+          </p>
+        ) : null}
         <button type="submit" className="btn btn-primary" disabled={busy}>
           {register ? "Создать кабинет" : "Войти"}
         </button>

@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AuthScreen } from "@/components/AuthScreen";
 import { BackLink } from "@/components/BackLink";
+import { CategoryField } from "@/components/CategoryField";
+import { fetchBrand } from "@/lib/brandClient";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Field } from "@/components/Field";
-import { CATEGORIES } from "@/lib/catalog";
 import { manualForDevice } from "@/lib/manuals";
-import { daysWord, formatDate, formatMoney, todayIso } from "@/lib/dates";
+import { daysWord, formatDate, formatMoney, formatPriceInput, todayIso } from "@/lib/dates";
 import type { DevicePatch } from "@/lib/devicePatch";
 import { loadDevices, loadEmail, saveDevices, updateDevice } from "@/lib/storage";
 import type { Device } from "@/lib/types";
@@ -63,9 +64,6 @@ export function DeviceScreen({ id }: { id: string }) {
   const shownMonths = Number.isInteger(formMonths) && formMonths >= 1 && formMonths <= 120 ? formMonths : device.warrantyMonths;
   const reminders = remindersFor(device);
   const manualUrl = manualForDevice(device.manualUrl, device.brand, device.model);
-  const categories = (CATEGORIES as readonly string[]).includes(form.category)
-    ? CATEGORIES
-    : [form.category, ...CATEGORIES];
 
   function remove() {
     const next = loadDevices().filter((item) => item.id !== device?.id);
@@ -74,7 +72,8 @@ export function DeviceScreen({ id }: { id: string }) {
   }
 
   function edit(key: keyof FormState, value: string) {
-    setForm((current) => (current ? { ...current, [key]: value } : current));
+    const next = key === "priceRub" ? formatPriceInput(value) : value;
+    setForm((current) => (current ? { ...current, [key]: next } : current));
     setFieldErrors((current) => {
       if (!current[key]) return current;
       const next = { ...current };
@@ -200,18 +199,27 @@ export function DeviceScreen({ id }: { id: string }) {
         <Field label="Название в кабинете">
           <input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} />
         </Field>
-        <Field label="Категория">
-          <select value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })}>
-            {categories.map((category) => (
-              <option key={category}>{category}</option>
-            ))}
-          </select>
-        </Field>
+        <CategoryField value={form.category} onChange={(value) => setForm({ ...form, category: value })} />
         <Field label="Бренд" error={fieldErrors.brand}>
           <input value={form.brand} onChange={(event) => edit("brand", event.target.value)} />
         </Field>
         <Field label="Модель" error={fieldErrors.model}>
-          <input value={form.model} onChange={(event) => edit("model", event.target.value)} />
+          <input
+            value={form.model}
+            onChange={(event) => edit("model", event.target.value)}
+            onBlur={(event) => {
+              const model = event.target.value.trim();
+              if (model.length < 4) return;
+              void fetchBrand(model).then((brand) => {
+                if (!brand) return;
+                setForm((current) => {
+                  if (!current || current.brand.trim() || current.model.trim() !== model) return current;
+                  const title = current.title.trim() ? current.title : `${brand} ${current.model.trim()}`;
+                  return { ...current, brand, title };
+                });
+              });
+            }}
+          />
         </Field>
         <Field label="Серийный номер">
           <input value={form.serialNumber} onChange={(event) => setForm({ ...form, serialNumber: event.target.value })} />
@@ -231,7 +239,7 @@ export function DeviceScreen({ id }: { id: string }) {
           />
         </Field>
         <Field label="Цена, ₽" error={fieldErrors.priceRub}>
-          <input inputMode="decimal" value={form.priceRub} onChange={(event) => edit("priceRub", event.target.value)} />
+          <input inputMode="numeric" value={form.priceRub} onChange={(event) => edit("priceRub", event.target.value)} />
         </Field>
         <div className="flex flex-col justify-end gap-2">
           <div className="flex flex-wrap items-center gap-4">
@@ -338,7 +346,7 @@ function toForm(device: Device): FormState {
     serialNumber: device.serialNumber,
     store: device.store,
     purchaseDate: device.purchaseDate,
-    priceRub: device.priceRub === null ? "" : String(device.priceRub),
+    priceRub: device.priceRub === null ? "" : formatPriceInput(String(device.priceRub)),
     warrantyMonths: device.warrantyMonths === null ? "" : String(device.warrantyMonths),
   };
 }

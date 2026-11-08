@@ -150,6 +150,55 @@ select {
   border-color: var(--orange);
 }
 
+.category-field {
+  position: relative;
+}
+
+.category-menu {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% - 0.15rem);
+  left: 0;
+  right: 0;
+  max-height: 9.5rem;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: white;
+  box-shadow: 0 8px 20px rgba(17, 17, 17, 0.08);
+}
+
+.category-menu p {
+  padding: 0.4rem 0.7rem 0.1rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a8a8a;
+}
+
+.category-menu button {
+  display: block;
+  width: 100%;
+  padding: 0.32rem 0.7rem;
+  text-align: left;
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+.category-menu button:hover,
+.category-menu button[aria-selected="true"] {
+  background: #f6f6f6;
+  color: var(--orange);
+}
+
+.category-menu .category-empty {
+  padding: 0.55rem 0.7rem;
+  font-size: 0.82rem;
+  color: #6b6b6b;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 .field-error {
   font-size: 0.75rem;
   line-height: 1.35;

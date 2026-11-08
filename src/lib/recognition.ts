@@ -68,6 +68,13 @@ function asNumber(value: unknown): number | null {
   return null;
 }
 
+export function modelsMatch(left: string, right: string) {
+  const a = left.toLowerCase().replace(/[^a-zа-я0-9]/gi, "");
+  const b = right.toLowerCase().replace(/[^a-zа-я0-9]/gi, "");
+  if (a.length < 4 || b.length < 4) return false;
+  return a === b || a.includes(b) || b.includes(a);
+}
+
 export function splitDataUrl(value: string): { mimeType: string; data: string } | null {
   const match = value.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,([a-zA-Z0-9+/=\s]+)$/);
   if (!match) return null;

@@ -78,6 +78,12 @@ export function SiteFooter() {
           Как выглядит письмо
         </Link>
       </div>
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 border-t border-white/15 px-6 py-4 text-sm text-paper/70">
+        <p>Планируется ИП. ОКВЭД 62.01 и 63.11. УСН 6%.</p>
+        <Link href="/legal" className="link-orange">
+          Правовая информация
+        </Link>
+      </div>
     </footer>
   );
 }

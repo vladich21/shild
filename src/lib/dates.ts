@@ -42,3 +42,8 @@ export function daysWord(count: number): string {
 export function formatMoney(value: number): string {
   return `${new Intl.NumberFormat("ru-RU").format(value)} ₽`;
 }
+
+export function formatPriceInput(value: string): string {
+  const digits = value.replace(/\D/g, "").replace(/^0+(?=\d)/, "");
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}

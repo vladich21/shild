@@ -1,20 +1,103 @@
 import type { CatalogModel } from "./types";
 
-export const CATEGORIES = [
-  "Стиральная машина",
-  "Духовой шкаф",
-  "Холодильник",
-  "Микроволновка",
-  "Пылесос",
-  "Чайник",
-  "Кондиционер",
-  "Утюг",
-  "Ноутбук",
-  "Монитор",
-  "Смартфон",
-  "Наушники",
-  "Другое",
+export const CATEGORY_GROUPS = [
+  {
+    label: "Кухня",
+    items: [
+      "Холодильник",
+      "Морозильник",
+      "Винный шкаф",
+      "Посудомоечная машина",
+      "Плита",
+      "Варочная панель",
+      "Духовой шкаф",
+      "Вытяжка",
+      "Микроволновка",
+      "Мультиварка",
+      "Хлебопечка",
+      "Аэрогриль",
+      "Кофемашина",
+      "Кофеварка",
+      "Чайник",
+      "Тостер",
+      "Блендер",
+      "Миксер",
+      "Мясорубка",
+      "Соковыжималка",
+      "Кухонный комбайн",
+    ],
+  },
+  {
+    label: "Стирка и уборка",
+    items: [
+      "Стиральная машина",
+      "Сушильная машина",
+      "Пылесос",
+      "Робот-пылесос",
+      "Пароочиститель",
+      "Утюг",
+      "Отпариватель",
+      "Швейная машина",
+    ],
+  },
+  {
+    label: "Климат и вода",
+    items: [
+      "Кондиционер",
+      "Обогреватель",
+      "Тепловентилятор",
+      "Увлажнитель воздуха",
+      "Очиститель воздуха",
+      "Вентилятор",
+      "Водонагреватель",
+      "Фильтр для воды",
+    ],
+  },
+  {
+    label: "Телевизор и звук",
+    items: ["Телевизор", "Саундбар", "Колонка", "Музыкальный центр", "Проектор"],
+  },
+  {
+    label: "Компьютеры и связь",
+    items: [
+      "Ноутбук",
+      "Системный блок",
+      "Моноблок",
+      "Монитор",
+      "Планшет",
+      "Смартфон",
+      "Телефон",
+      "Умные часы",
+      "Наушники",
+      "Роутер",
+      "Принтер",
+      "МФУ",
+      "Игровая приставка",
+      "Фотоаппарат",
+    ],
+  },
+  {
+    label: "Уход",
+    items: ["Фен", "Электробритва", "Эпилятор", "Зубная щётка"],
+  },
 ] as const;
+
+export const CATEGORIES = CATEGORY_GROUPS.flatMap((group) => [...group.items]);
+
+export function listedCategory(value: string | null | undefined) {
+  const key = value?.trim().toLowerCase() ?? "";
+  if (!key || key === "другое") return "";
+  return CATEGORIES.find((item) => item.toLowerCase() === key) ?? "";
+}
+
+export function categoryFromReading(deviceType: string | null | undefined, catalogCategory?: string | null) {
+  const listed = listedCategory(deviceType);
+  if (listed) return listed;
+  if (catalogCategory) return catalogCategory;
+  const custom = deviceType?.trim() ?? "";
+  if (custom && custom.toLowerCase() !== "другое") return custom;
+  return "";
+}
 
 export const FREE_DEVICE_LIMIT = 5;
 

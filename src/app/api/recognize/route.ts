@@ -1,4 +1,6 @@
-import { matchCatalog } from "@/lib/catalog";
+import { resolveBrand } from "@/lib/brandLookup";
+import { CATEGORIES, matchCatalog } from "@/lib/catalog";
+import { askGemini } from "@/lib/gemini";
 import { manualLookupPrompt, readManualUrl, resolveManual } from "@/lib/manuals";
 import {
   knownManufacturerWarranty,
@@ -9,29 +11,41 @@ import { DEFAULT_GEMINI_MODEL, normalizeRecognition, splitDataUrl } from "@/lib/
 import type { Recognition } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
-const PROMPT = `Ты читаешь фото для сервиса «Шильд», личного паспорта одной единицы техники.
-Снимков может быть два, у каждого есть подпись.
+const CATEGORY_LIST = CATEGORIES.join(", ");
 
-«Фото техники или наклейки» — источник бренда, модели, типа устройства и серийного номера.
-«Фото чека или гарантийного талона» — это либо кассовый чек, либо гарантийный талон. Оба годятся.
+function nameplatePrompt() {
+  return `Ты читаешь только фото техники или наклейки для сервиса «Шильд». Чека в этом запросе нет.
 
-Сначала сверь второй снимок с наклейкой. Талон или строка чека относятся к этой технике, если бренд и модель совпадают с наклейкой: «TP-Link» и «Archer C24» на талоне — то же устройство, что «TP-Link Archer C24» на шильдике. Совпадение серийного номера тоже подтверждает. «Zyxel Keenetic» — уже другая техника.
-Если совпало, забери с талона или из подходящей строки чека только то, что там прямо написано: магазин, дату покупки или продажи, цену и срок гарантии.
-Если бренд и модель на талоне не совпали с наклейкой, цену, дату и магазин не бери. В notes напиши, что талон от другой техники.
+brand верни только если бренд написан на наклейке. Не угадывай бренд по модели.
+model — код модели как на наклейке. serialNumber — серийный номер, если он написан.
+deviceType — одно название из списка, если подходит: ${CATEGORY_LIST}.
+Если тип виден, но его нет в списке, напиши коротко по-русски. Не пиши «Другое». Если тип не виден, null.
+store, purchaseDate, priceRub и warrantyMonths с наклейки не заполняй: для них нужен чек или талон. Ставь null.
+Верни только то, что видно. Если поля нет, null. confidence — число от 0 до 1.`;
+}
 
-На чеке часто несколько покупок. Цену бери только из строки про эту технику. Магазин и дату — из шапки чека, и только если такая строка нашлась.
-Не выбирай первую, последнюю или самую дорогую строку. Итоговую сумму чека не бери.
-Если даты покупки или продажи нет ни на чеке, ни на талоне, purchaseDate = null. Не выдумывай дату.
-warrantyMonths заполняй только когда срок прямо написан: «12 месяцев» или «1 год» — это 12. Срок «после регистрации» и расширенную гарантию не бери. Не угадывай 12 месяцев, если срока на снимке нет.
+function receiptPrompt(known: { brand: string; model: string; serialNumber: string }) {
+  const knownLines = known.model || known.brand || known.serialNumber
+    ? `Наклейка уже прочитана, её фото в запросе нет. С наклейки: бренд «${known.brand || "не написан"}», модель «${known.model || "не написана"}», серийный номер «${known.serialNumber || "не написан"}».
+Строка чека или талон — эта техника, если модель совпадает${known.model ? ` с «${known.model}»` : ""}. Совпадение серийного номера тоже подтверждает.
+Если на наклейке бренда не было, а на документе та же модель и бренд написан — верни этот brand. Пример: наклейка «KGN49XI20R», талон «Bosch KGN49XI20R» — brand = Bosch.
+Если модель другая — brand, store, purchaseDate, priceRub и warrantyMonths = null. В notes напиши, что документ от другой техники.`
+    : `Наклейки ещё нет. Если на снимке одна техника — заполни brand, model и цену. Если покупок несколько — не угадывай устройство: brand, model и priceRub = null, строки перечисли в notes.`;
 
-Если наклейки нет и на втором снимке одна техника — заполни бренд, модель и цену из него.
-Если наклейки нет и покупок несколько — не угадывай устройство: brand, model и priceRub оставь пустыми, а строки перечисли в notes.
+  return `Ты читаешь только фото чека или гарантийного талона для сервиса «Шильд». Наклейку повторно не смотри.
 
-Верни только то, что реально видно. Если поля нет, ставь null.
-purchaseDate верни в формате YYYY-MM-DD.
-priceRub — число рублей за одну единицу этой техники, без валюты.
-confidence — число от 0 до 1.`;
+${knownLines}
+
+Бери только написанное: бренд, магазин, дату покупки или продажи, цену одной единицы и срок гарантии.
+Цену бери из строки про эту технику. Итог чека не бери. Не выбирай первую, последнюю или самую дорогую строку.
+Дату не выдумывай. Если даты нет, purchaseDate = null.
+warrantyMonths только если срок написан: «12 месяцев» или «1 год» — это 12. Срок после регистрации и расширенную гарантию не бери.
+model верни так, как написано на этом документе.
+deviceType — из списка, если тип понятен: ${CATEGORY_LIST}. Если типа нет в списке, короткое русское название. Не пиши «Другое». Если тип не виден, null.
+purchaseDate в формате YYYY-MM-DD. priceRub — число рублей. confidence от 0 до 1. Если поля нет, null.`;
+}
 
 export async function GET() {
   return Response.json({
@@ -52,47 +66,71 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: { deviceImage?: string | null; receiptImage?: string | null };
+  let body: {
+    image?: string | null;
+    kind?: "nameplate" | "receipt";
+    known?: { brand?: string; model?: string; serialNumber?: string };
+    enrich?: boolean;
+  };
   try {
     body = await request.json();
   } catch {
     return Response.json({ error: "Не удалось отправить фото. Попробуйте ещё раз." }, { status: 400 });
   }
 
-  const images = [
-    labeled("Фото техники или наклейки", body.deviceImage),
-    labeled("Фото чека или гарантийного талона", body.receiptImage),
-  ].filter((item): item is { label: string; mimeType: string; data: string } => Boolean(item));
+  const kind = body.kind === "receipt" ? "receipt" : "nameplate";
+  const known = {
+    brand: asKnown(body.known?.brand),
+    model: asKnown(body.known?.model),
+    serialNumber: asKnown(body.known?.serialNumber),
+  };
+  const image = labeled(
+    kind === "receipt" ? "Фото чека или гарантийного талона" : "Фото техники или наклейки",
+    body.image,
+  );
 
-  if (images.length === 0) {
+  if (!image) {
     return Response.json({ error: "Сначала добавьте фото техники или чека." }, { status: 400 });
   }
 
-  if (images.some((image) => image.data.length > 5_000_000)) {
+  if (image.data.length > 5_000_000) {
     return Response.json({ error: "Фото слишком большое. Снимите его ближе и загрузите ещё раз." }, { status: 413 });
   }
 
   const model = process.env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
   const parts = [
-    { text: PROMPT },
-    ...images.flatMap((image) => [
-      { text: image.label },
-      { inlineData: { mimeType: image.mimeType, data: image.data } },
-    ]),
+    { text: kind === "receipt" ? receiptPrompt(known) : nameplatePrompt() },
+    { text: image.label },
+    { inlineData: { mimeType: image.mimeType, data: image.data } },
   ];
 
   try {
     const payload = await generate(model, key, parts);
     const recognition = normalizeRecognition(payload);
-    await attachManufacturerWarranty(recognition, model, key);
-    if (recognition.brand && recognition.model) {
-      recognition.manualUrl = await findManual(recognition.brand, recognition.model, model, key);
+    if (body.enrich !== false) {
+      if (!recognition.brand && recognition.model) {
+        const found = await resolveBrand(recognition.model, (prompt) => askGemini(key, model, [{ text: prompt }]));
+        if (found) recognition.brand = found;
+      }
+      await Promise.all([
+        attachManufacturerWarranty(recognition, model, key),
+        fillManual(recognition, model, key),
+      ]);
     }
     return Response.json({ recognition });
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
     return Response.json({ error: plainRecognizeError(message) }, { status: 502 });
   }
+}
+
+async function fillManual(recognition: Recognition, model: string, key: string) {
+  if (!recognition.brand || !recognition.model) return;
+  recognition.manualUrl = await findManual(recognition.brand, recognition.model, model, key);
+}
+
+function asKnown(value: string | null | undefined) {
+  return typeof value === "string" ? value.trim() : "";
 }
 
 async function findManual(brand: string, modelName: string, model: string, key: string) {
@@ -133,84 +171,12 @@ function labeled(label: string, value: string | null | undefined) {
   return { label, ...image };
 }
 
-async function generate(
+function generate(
   model: string,
   key: string,
   parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }>,
 ) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-  const body = {
-    contents: [{ role: "user", parts }],
-    generationConfig: {
-      temperature: 0.1,
-      responseMimeType: "application/json",
-    },
-  };
-
-  let result = await requestGemini(url, key, body);
-  if (!result.ok && result.status >= 500) {
-    result = await requestGemini(url, key, body);
-  }
-  if (!result.ok) throw new Error(modelError(result.status));
-  return readModelJson(result.data);
-}
-
-async function requestGemini(url: string, key: string, body: unknown) {
-  let response: Response;
-  try {
-    response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": key,
-      },
-      body: JSON.stringify(body),
-    });
-  } catch {
-    throw new Error("Нет связи с сервисом чтения фото. Проверьте интернет и попробуйте снова.");
-  }
-  const data = await response.json().catch(() => ({}));
-  return { ok: response.ok, status: response.status, data };
-}
-
-function readModelJson(data: {
-  candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
-}) {
-  const text = (data.candidates?.[0]?.content?.parts ?? [])
-    .map((part) => part.text ?? "")
-    .join("")
-    .trim()
-    .replace(/^```json\s*/i, "")
-    .replace(/```$/, "");
-
-  if (!text) {
-    throw new Error("Не удалось прочитать текст на фото. Снимите наклейку или чек крупнее.");
-  }
-
-  try {
-    return JSON.parse(text) as unknown;
-  } catch {
-    throw new Error("Не удалось разобрать фото. Попробуйте другой снимок.");
-  }
-}
-
-function modelError(status: number) {
-  if (status === 401 || status === 403) {
-    return "Ключ для чтения фото не подошёл. Проверьте его и обновите страницу.";
-  }
-  if (status === 429) {
-    return "Слишком много попыток подряд. Подождите минуту и загрузите фото ещё раз.";
-  }
-  if (status === 400) {
-    return "Не получилось прочитать эти фото. Снимите наклейку и чек крупнее и попробуйте снова.";
-  }
-  if (status === 404) {
-    return "Сервис чтения фото сейчас недоступен. Попробуйте позже.";
-  }
-  if (status >= 500) {
-    return "Сервис чтения фото сейчас не отвечает. Попробуйте ещё раз через минуту.";
-  }
-  return "Не удалось распознать фото. Попробуйте другой снимок.";
+  return askGemini(key, model, parts);
 }
 
 function plainRecognizeError(message: string) {

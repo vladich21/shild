@@ -1,4 +1,4 @@
-import { CATEGORIES, matchCatalog } from "./catalog";
+import { matchCatalog } from "./catalog";
 import type { Device, WarrantySource } from "./types";
 
 export type DevicePatchInput = {
@@ -65,10 +65,8 @@ export function normalizeDevicePatch(input: DevicePatchInput): { ok: true; patch
   }
 
   const catalog = matchCatalog(brand, model);
-  const category = (CATEGORIES as readonly string[]).includes(input.category)
-    ? input.category
-    : catalog?.category ?? "Другое";
-  const title = input.title.trim() || [category !== "Другое" ? category : "", brand, model].filter(Boolean).join(" ");
+  const category = input.category.trim() || catalog?.category || "";
+  const title = input.title.trim() || [brand, model].filter(Boolean).join(" ");
 
   return {
     ok: true,
